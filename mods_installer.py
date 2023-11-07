@@ -15,7 +15,7 @@ import pip_api
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
-        wx.Frame.__init__(self, None, id, title, wx.DefaultPosition, wx.Size(515, 780),style=wx.MINIMIZE_BOX|wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX|wx.STAY_ON_TOP)
+        wx.Frame.__init__(self, None, id, title, wx.DefaultPosition, wx.Size(515, 815),style=wx.MINIMIZE_BOX|wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX|wx.STAY_ON_TOP)
 
         #Panel pour affichage
         self.panel = wx.Panel(self,-1)
@@ -167,6 +167,11 @@ class MyFrame(wx.Frame):
         #couleur bouton zik
         self.buttonZik.SetBackgroundColour(wx.GREEN)
 
+    #Threads wrapper usage : mark @threaded over differents threads
+    def threaded(fn):
+        def wrapper(*args, **kwargs):
+            threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+        return wrapper
 
     def on_focus(self,evt):
         if evt.MouseEvent.LeftDClick():
@@ -174,13 +179,8 @@ class MyFrame(wx.Frame):
             urlEnd = evt.GetURLEnd()
             lib = self.AffichTxt.GetRange(urlStart+7, urlEnd)
             print(lib)
+        self.AffichTxt.SetToolTip(wx.ToolTip('Test ;)'))
         evt.Skip()
-        
-    #Threads wrapper usage : mark @threaded over differents threads
-    def threaded(fn):
-        def wrapper(*args, **kwargs):
-            threading.Thread(target=fn, args=args, kwargs=kwargs).start()
-        return wrapper
 
     @threaded
     def upall(self,evt):
@@ -213,8 +213,15 @@ class MyFrame(wx.Frame):
         for k, v in i.items():
             lib = "http://"+k+"-"+str(v.version)
             
-            self.AffichTxt.AppendText(lib + "\n")
+            self.AffichTxt.AppendText(lib +" => "+k+"-"+str(v.version)+"\n")
+            self.reset_scroll_pos()
+        evt.Skip()
+
+    def reset_scroll_pos(self):
+        self.AffichTxt.SetScrollPos(wx.VERTICAL,self.AffichTxt.GetScrollRange(wx.VERTICAL))
+        self.AffichTxt.SetInsertionPoint(0)
         
+    @threaded 
     def button_play(self,evt):
         colorpause=self.buttonZik.GetBackgroundColour()
         if colorpause==(wx.GREEN):
@@ -225,7 +232,8 @@ class MyFrame(wx.Frame):
             self.buttonZikStop.SetBackgroundColour("")
             self.buttonZik.SetBackgroundColour(wx.GREEN)
         evt.Skip()
-
+        
+    @threaded
     def button_stop(self,evt):
         self.buttonZikStop.SetBackgroundColour(wx.RED)
         self.buttonZik.SetBackgroundColour("")
@@ -263,6 +271,7 @@ class MyFrame(wx.Frame):
             self.txtVideMemo.SetForegroundColour("FOREST GREEN")
             self.txtVidePIP.SetForegroundColour("FOREST GREEN")
             self.AffichTxt.AppendText(outs + "\n")
+            self.reset_scroll_pos()
             is_ok = 1
         if errs:
             self.txtVideMemo.SetLabel("")
@@ -272,6 +281,7 @@ class MyFrame(wx.Frame):
             self.txtVideMemo.SetForegroundColour("RED")
             self.txtVidePIP.SetForegroundColour("RED")
             self.AffichTxt.AppendText(errs + "\n")
+            self.reset_scroll_pos()
             is_ok = 0
 
     #Kinda deprecated as it's not supposed to be possible...
