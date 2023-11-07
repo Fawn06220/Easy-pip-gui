@@ -12,7 +12,6 @@ import wx.media
 import threading
 import pip_api
 
-
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
         wx.Frame.__init__(self, None, id, title, wx.DefaultPosition, wx.Size(515, 815),style=wx.MINIMIZE_BOX|wx.SYSTEM_MENU | wx.CAPTION | wx.CLOSE_BOX|wx.STAY_ON_TOP)
@@ -53,6 +52,13 @@ class MyFrame(wx.Frame):
         self.up_all.SetForegroundColour("ORANGE")
         self.up_all.SetFont(wx.Font(12, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
         self.up_all.SetToolTip(wx.ToolTip('Click update all libraries (using pip-review)'))
+
+        #Help 
+        self.help = wx.Button(self.panel,-1,"Need help ?")
+        self.Bind(wx.EVT_BUTTON, self.show_help, self.help)
+        self.help.SetForegroundColour("forest Green")
+        self.help.SetFont(wx.Font(12, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
+        self.help.SetToolTip(wx.ToolTip('Click if you need help'))
 
         #Show installed Libs
         self.show_all = wx.Button(self.panel,-1,"Show Installed Libs")
@@ -114,6 +120,7 @@ class MyFrame(wx.Frame):
         gbox1.Add(self.txtBox,(0,1))
         gbox1.Add(self.txtVideMemo,(1,1))
         gbox1.Add(self.MOD_uninstall,(2,0))
+        gbox1.Add(self.help,(3,0))
         gbox1.Add(self.up_all,(3,1))
         gbox1.Add(self.show_all,(2,1))
 
@@ -172,6 +179,10 @@ class MyFrame(wx.Frame):
         def wrapper(*args, **kwargs):
             threading.Thread(target=fn, args=args, kwargs=kwargs).start()
         return wrapper
+
+    def show_help(self,evt):
+        pass
+        evt.Skip()
 
     def on_focus(self,evt):
         if evt.MouseEvent.LeftDClick():
@@ -353,6 +364,7 @@ class MyFrame(wx.Frame):
     def Chrono(self):#Chronometre (date )
         stemps = time.strftime("%A %d/%m/%Y") #Definit le format voulu
         self.SetStatusText(stemps,1) #Affiche a droite.
+        self.SetStatusText("Developped by François Garbez",0)
     
     def CreerBarreEtat(self):#Creation de la barre d'etat du bas avec l'affichage de la date
         self.CreateStatusBar(2) #Cree une barre de statut (en bas) de deux parties.
@@ -392,7 +404,7 @@ class Loader(wx.Frame):
         
 class MyApp(wx.App):
     def OnInit(self):
-        frame = MyFrame(None, -1, "PIP_GUI_V1.0 by François GARBEZ")
+        frame = MyFrame(None, -1, "PIP_GUI_V1.0")
         frame.Show(True)
         frame.Centre()
         return True
@@ -403,4 +415,4 @@ if __name__=='__main__':
     app.MainLoop()
 
 
-### PIP_GUI_V1.0 by François GARBEZ 25/10/2023 Tested on python 3.12 Win10 ###
+### PIP_GUI_V1.0 by François GARBEZ 07/11/2023 Tested on python 3.12 Win10 ###
