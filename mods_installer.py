@@ -348,7 +348,7 @@ class MyFrame(wx.Frame):
         if (is_ok):
             self.MOD_uninstall_out()
         else:
-            MOD_uninstall_err()
+            self.MOD_uninstall_err()
         evt.Skip()
 
     def MOD_uninstall_out(self):
