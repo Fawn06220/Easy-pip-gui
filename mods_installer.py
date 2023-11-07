@@ -10,12 +10,8 @@ import shlex
 import wx.lib.agw.hyperlink as hl
 import wx.media
 import threading
+import pip_api
 
-#Threads wrapper
-def threaded(fn):
-    def wrapper(*args, **kwargs):
-        threading.Thread(target=fn, args=args, kwargs=kwargs).start()
-    return wrapper
 
 class MyFrame(wx.Frame):
     def __init__(self, parent, id, title):
@@ -49,12 +45,21 @@ class MyFrame(wx.Frame):
         self.MOD_uninstall.Disable()
         self.MOD_uninstall.SetForegroundColour("RED")
         self.MOD_uninstall.SetFont(wx.Font(12, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
+        self.MOD_uninstall.SetToolTip(wx.ToolTip('Click to uninstall library'))
 
         #Auto update (all libs !)
         self.up_all = wx.Button(self.panel,-1,"Update ALL libraries ?")
         self.Bind(wx.EVT_BUTTON, self.upall, self.up_all)
         self.up_all.SetForegroundColour("ORANGE")
         self.up_all.SetFont(wx.Font(12, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
+        self.up_all.SetToolTip(wx.ToolTip('Click update all libraries (using pip-review)'))
+
+        #Show installed Libs
+        self.show_all = wx.Button(self.panel,-1,"Show Installed Libs")
+        self.Bind(wx.EVT_BUTTON, self.show_installed_libs, self.show_all)
+        self.show_all.SetForegroundColour("BLUE")
+        self.show_all.SetFont(wx.Font(12, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
+        self.show_all.SetToolTip(wx.ToolTip('Click to see all installed libraries'))
 
         #Boutons musique
         self.buttonZik = wx.Button(self.panel,-1,"Play/Pause")
@@ -66,7 +71,6 @@ class MyFrame(wx.Frame):
         #widgets vides
         self.txtVideMemo = wx.StaticText(self.panel,-1,"")
         self.txtVideMemo.SetFont(wx.Font(18, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
-        self.txtVideMemo.SetForegroundColour("RED")
         
         self.txtVidePIP = wx.StaticText(self.panel,-1,"")
         self.txtVidePIP.SetFont(wx.Font(10, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False, "Impact" ))
@@ -78,10 +82,11 @@ class MyFrame(wx.Frame):
         self.txtBox.SetHint("Type library name here...")
         self.Bind(wx.EVT_TEXT_ENTER,self.Get_Mod,self.txtBox)
         
-        self.AffichTxt=wx.TextCtrl(self.panel,-1,size=(450,300),style=wx.TE_MULTILINE|wx.TE_READONLY)
+        self.AffichTxt=wx.TextCtrl(self.panel,-1,size=(450,300),style=wx.TE_MULTILINE|wx.TE_READONLY|wx.TE_AUTO_URL|wx.TE_RICH)
         self.AffichTxt.SetBackgroundColour('BLACK')
         self.AffichTxt.SetFont(wx.Font(10, wx.DEFAULT , wx.NORMAL, wx.NORMAL,False ))
         self.AffichTxt.SetForegroundColour("FOREST GREEN")
+        self.AffichTxt.Bind(wx.EVT_TEXT_URL, self.on_focus,self.AffichTxt)
 
         self.txtMajPip = wx.StaticText(self.panel,-1,"Link to Dev's Paypal.me :")
 
@@ -109,7 +114,8 @@ class MyFrame(wx.Frame):
         gbox1.Add(self.txtBox,(0,1))
         gbox1.Add(self.txtVideMemo,(1,1))
         gbox1.Add(self.MOD_uninstall,(2,0))
-        gbox1.Add(self.up_all,(2,1))
+        gbox1.Add(self.up_all,(3,1))
+        gbox1.Add(self.show_all,(2,1))
 
         #Sizer affichage
         gbox2 = wx.GridBagSizer(10,10)
@@ -160,29 +166,54 @@ class MyFrame(wx.Frame):
 
         #couleur bouton zik
         self.buttonZik.SetBackgroundColour(wx.GREEN)
-    
+
+
+    def on_focus(self,evt):
+        if evt.MouseEvent.LeftDClick():
+            urlStart = evt.GetURLStart()
+            urlEnd = evt.GetURLEnd()
+            lib = self.AffichTxt.GetRange(urlStart+7, urlEnd)
+            print(lib)
+        evt.Skip()
+        
+    #Threads wrapper usage : mark @threaded over differents threads
+    def threaded(fn):
+        def wrapper(*args, **kwargs):
+            threading.Thread(target=fn, args=args, kwargs=kwargs).start()
+        return wrapper
+
     @threaded
     def upall(self,evt):
         global process
-        self.AffichTxt.Clear()
         self.show_loader()
-        process = subprocess.Popen(shlex.split('pip-review --auto'),encoding ="utf-8", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
+        process = subprocess.Popen(shlex.split('pip-review --auto'),encoding ="cp1252", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
         self.get_data()
-        if outs:
+        if (is_ok==1):
             self.upall_out()
-        if errs:
+        else:
             self.upall_err()
+        evt.Skip()
 
     def upall_out(self):
         self.hide_loader()
         self.txtVideMemo.SetLabel("ALL Libraries updates done !")
-        self.txtVideMemo.SetForegroundColour("FOREST GREEN")
         self.up_all.Disable()
 
     def upall_err(self):
         self.hide_loader()
         self.txtVideMemo.SetLabel("Update not done !")
-        self.txtVideMemo.SetForegroundColour("RED")
+
+    def show_installed_libs(self,evt):
+        self.AffichTxt.Clear()
+        self.AffichTxt.SetForegroundColour("FOREST GREEN")
+        self.AffichTxt.AppendText("--------------------------" + "\n")
+        self.AffichTxt.AppendText("Installed Librairies" + "\n")
+        self.AffichTxt.AppendText("--------------------------" + "\n")
+        i = pip_api.installed_distributions()
+        for k, v in i.items():
+            lib = "http://"+k+"-"+str(v.version)
+            
+            self.AffichTxt.AppendText(lib + "\n")
         
     def button_play(self,evt):
         colorpause=self.buttonZik.GetBackgroundColour()
@@ -212,91 +243,101 @@ class MyFrame(wx.Frame):
     @threaded
     def PIPinstall_verif(self,evt):
         global process
-        self.AffichTxt.Clear()
         self.show_loader()
-        process = subprocess.Popen(shlex.split('python -m pip install --upgrade pip'),encoding ="utf-8", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
+        process = subprocess.Popen(shlex.split('python -m pip install --upgrade pip'),encoding ="cp1252", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
         self.get_data()
-        if outs:
+        if (is_ok==1):
             self.PIP_verif_out()
-        if errs:
+        else:
             self.PIP_verif_err()
         evt.Skip()
 
     def get_data(self):
-        global outs,errs
+        global outs,errs,is_ok
         outs,errs = process.communicate()
-        if outs:
+        if (outs and not errs):
+            self.txtVideMemo.SetLabel("")
+            self.AffichTxt.Clear()
+            self.txtVidePIP.SetLabel("")
             self.AffichTxt.SetForegroundColour("FOREST GREEN")
+            self.txtVideMemo.SetForegroundColour("FOREST GREEN")
+            self.txtVidePIP.SetForegroundColour("FOREST GREEN")
             self.AffichTxt.AppendText(outs + "\n")
+            is_ok = 1
         if errs:
+            self.txtVideMemo.SetLabel("")
+            self.AffichTxt.Clear()
+            self.txtVidePIP.SetLabel("")
             self.AffichTxt.SetForegroundColour("RED")
+            self.txtVideMemo.SetForegroundColour("RED")
+            self.txtVidePIP.SetForegroundColour("RED")
             self.AffichTxt.AppendText(errs + "\n")
+            is_ok = 0
 
     #Kinda deprecated as it's not supposed to be possible...
     def PIP_verif_err(self):
         self.hide_loader()
         self.txtVidePIP.SetLabel('PIP not installed !')
-        self.txtVidePIP.SetForegroundColour("RED")
         self.PIP_install.Enable()
         self.PIP_install_verif.Disable()
         
     def PIP_verif_out(self):
         self.hide_loader()
         self.txtVidePIP.SetLabel('PIP is Up To Date !')
-        self.txtVidePIP.SetForegroundColour("FOREST GREEN")
         self.PIP_install_verif.Disable()
 
     @threaded     
     def Get_Mod(self,evt):
         global exception,process
         exception=0
-        self.AffichTxt.Clear()
         mod_to_install=self.txtBox.GetValue()
         self.show_loader()
-        process = subprocess.Popen(shlex.split('python -m pip install '+mod_to_install),encoding ="utf-8", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
+        process = subprocess.Popen(shlex.split('python -m pip install '+mod_to_install),encoding ="cp1252", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
         self.get_data()
-        if outs:
+        if (is_ok == 1):
             txt_except="Requirement already satisfied: "+mod_to_install
             if txt_except in outs:
                 exception=1    
             self.MOD_out()
-        if errs:
+        else:
             self.MOD_err()
         evt.Skip()
         
     def MOD_out(self):
         self.hide_loader()
         if exception==1:
-            self.txtVideMemo.SetForegroundColour("RED")
             self.txtVideMemo.SetLabel("Library already installed !")
             self.MOD_uninstall.Enable()
         else:
             self.txtVideMemo.SetLabel("Library installation done !")
-            self.txtVideMemo.SetForegroundColour("FOREST GREEN")
+            self.MOD_uninstall.Enable()
 
     def MOD_err(self):
         self.hide_loader()
-        self.txtVideMemo.SetForegroundColour("RED")
-        self.txtVideMemo.SetLabel("Library not found ! >_<")
-        self.MOD_uninstall.Enable()
+        self.txtVideMemo.SetLabel("Something went wrong ! >_<")
+        
 
     @threaded
     def MODuninstall(self,evt):
         global process
-        self.AffichTxt.Clear()
         mod_to_uninstall=self.txtBox.GetValue()
         self.show_loader()
-        process = subprocess.Popen(shlex.split('python -m pip uninstall -y '+mod_to_uninstall),encoding ="utf-8", text=True, stdout=subprocess.PIPE,shell=True)
+        process = subprocess.Popen(shlex.split('python -m pip uninstall -y '+mod_to_uninstall),encoding ="cp1252", text=True, stdout=subprocess.PIPE,shell=True)
         self.get_data()
-        if outs:
+        if (is_ok):
             self.MOD_uninstall_out()
+        else:
+            MOD_uninstall_err()
         evt.Skip()
 
     def MOD_uninstall_out(self):
         self.hide_loader()
-        self.txtVideMemo.SetLabel("")
         self.txtVideMemo.SetLabel("Library successfully uninstalled !")
-        self.txtVideMemo.SetForegroundColour("FOREST GREEN")
+        self.MOD_uninstall.Disable()
+
+    def MOD_uninstall_err(self):
+        self.hide_loader()
+        self.txtVideMemo.SetLabel("Something went wrong !>_<")
         self.MOD_uninstall.Disable()
     
     def Chrono(self):#Chronometre (date )
