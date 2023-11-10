@@ -181,16 +181,29 @@ class MyFrame(wx.Frame):
         return wrapper
 
     def show_help(self,evt):
-        pass
+        Connexion = wx.MessageDialog(self, "Show Installed Libs Notice :"+"\n\n"+"Left Double Click on link : Uninstall a single library"+"\n\n"+"Right Click on a link : Update a single Library"+"\n\n"+"That's all folks !","Help window",\
+        style=wx.ICON_QUESTION|wx.CENTRE|wx.OK,pos=wx.DefaultPosition) #Definit les attributs de la fenetre de message.
+        rep = Connexion.ShowModal() #Affiche le message a l'ecran.
         evt.Skip()
 
     def on_focus(self,evt):
+        urlStart = evt.GetURLStart()
+        urlEnd = evt.GetURLEnd()
+        lib = self.AffichTxt.GetRange(urlStart+7, urlEnd)
         if evt.MouseEvent.LeftDClick():
-            urlStart = evt.GetURLStart()
-            urlEnd = evt.GetURLEnd()
-            lib = self.AffichTxt.GetRange(urlStart+7, urlEnd)
-            print(lib)
-        self.AffichTxt.SetToolTip(wx.ToolTip('Test ;)'))
+            Connexion = wx.MessageDialog(self, "Do you want to uninstall "+lib+" ?","Uninstall a library",\
+            style=wx.ICON_QUESTION|wx.CENTRE|wx.YES_NO,pos=wx.DefaultPosition) #Definit les attributs de la fenetre de message.
+            rep = Connexion.ShowModal() #Affiche le message a l'ecran.
+            if (rep==wx.ID_YES):
+                self.txtBox.SetValue(lib)
+                self.MODuninstall(evt)
+        if evt.MouseEvent.RightDown():
+            Connexion = wx.MessageDialog(self, "Do you want to update "+lib+" ?","Update a library",\
+            style=wx.ICON_QUESTION|wx.CENTRE|wx.YES_NO,pos=wx.DefaultPosition) #Definit les attributs de la fenetre de message.
+            rep = Connexion.ShowModal() #Affiche le message a l'ecran.
+            if (rep==wx.ID_YES):
+                self.txtBox.SetValue(lib)
+                self.Up_Mod()
         evt.Skip()
 
     @threaded
@@ -222,8 +235,7 @@ class MyFrame(wx.Frame):
         self.AffichTxt.AppendText("--------------------------" + "\n")
         i = pip_api.installed_distributions()
         for k, v in i.items():
-            lib = "http://"+k+"-"+str(v.version)
-            
+            lib = "http://"+k
             self.AffichTxt.AppendText(lib +" => "+k+"-"+str(v.version)+"\n")
             self.reset_scroll_pos()
         evt.Skip()
@@ -307,6 +319,34 @@ class MyFrame(wx.Frame):
         self.txtVidePIP.SetLabel('PIP is Up To Date !')
         self.PIP_install_verif.Disable()
 
+    @threaded
+    def Up_Mod(self):
+        global process,exception
+        mod_to_up=self.txtBox.GetValue()
+        self.show_loader()
+        process = subprocess.Popen(shlex.split('python -m pip install --upgrade '+mod_to_up),encoding ="cp1252", text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,shell=True)
+        self.get_data()
+        if (is_ok == 1):
+            txt_except="Requirement already satisfied: "+mod_to_up
+            if txt_except in outs:
+                exception=1    
+            self.Up_Mod_out()
+        else:
+            self.Up_Mod_err()
+
+    def Up_Mod_out(self):
+        self.hide_loader()
+        if exception==1:
+            self.txtVideMemo.SetLabel("Library already Up to date !")
+            self.MOD_uninstall.Enable()
+        else:
+            self.txtVideMemo.SetLabel("Library Updated !")
+            self.MOD_uninstall.Enable()
+
+    def Up_Mod_err(self):
+        self.hide_loader()
+        self.txtVideMemo.SetLabel("Something went wrong ! >_<")
+        
     @threaded     
     def Get_Mod(self,evt):
         global exception,process
@@ -345,7 +385,7 @@ class MyFrame(wx.Frame):
         self.show_loader()
         process = subprocess.Popen(shlex.split('python -m pip uninstall -y '+mod_to_uninstall),encoding ="cp1252", text=True, stdout=subprocess.PIPE,shell=True)
         self.get_data()
-        if (is_ok):
+        if (is_ok==1):
             self.MOD_uninstall_out()
         else:
             self.MOD_uninstall_err()
@@ -415,4 +455,4 @@ if __name__=='__main__':
     app.MainLoop()
 
 
-### PIP_GUI_V1.0 by François GARBEZ 07/11/2023 Tested on python 3.12 Win10 ###
+### PIP_GUI_V1.0 by François GARBEZ 10/11/2023 Tested on python 3.12 Win10 ###
