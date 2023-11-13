@@ -4,7 +4,6 @@ import time
 from time import gmtime, strftime
 import os, sys
 from os.path import *
-from os import getcwd
 import subprocess
 import shlex
 import wx.lib.agw.hyperlink as hl
@@ -32,8 +31,7 @@ class MyFrame(wx.Frame):
         
         #Musique Player
         self.player = wx.media.MediaCtrl(self, szBackend=wx.media.MEDIABACKEND_WMP10)
-        zik_path= getcwd()+"\\music\\zik.mp3"
-        print(zik_path)
+        zik_path= os.path.dirname(__file__)+"\\music\\zik.mp3"
         self.player.Load(zik_path)
         self.Bind(wx.media.EVT_MEDIA_LOADED,self.button_play,self.player)
         
@@ -446,7 +444,7 @@ class Loader(wx.Frame):
         
 class MyApp(wx.App):
     def OnInit(self):
-        frame = MyFrame(None, -1, "PIP_GUI_V1.1.4")
+        frame = MyFrame(None, -1, "PIP_GUI_V1.1.5")
         frame.Show(True)
         frame.Centre()
         return True

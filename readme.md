@@ -8,7 +8,7 @@ FIRST READ HELP BY CLICKING "NEED HELP?" BUTTON =)
 - Possibility to list librairies
 - Possibility to update all your libraries/or one at once
 - Possibility to uninstall last installed(e.g if mistake) or from a list of installed libs
-- You can listen to music o/ => BUGGED ! Works in local but not after DL package from Pypi...ON GOING... 
+- You can listen to music o/ => FIXED !
 
 USAGE : python -m easy-pip-gui
 
