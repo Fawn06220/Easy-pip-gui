@@ -32,8 +32,9 @@ class MyFrame(wx.Frame):
         
         #Musique Player
         self.player = wx.media.MediaCtrl(self, szBackend=wx.media.MEDIABACKEND_WMP10)
-        curr_path= getcwd()
-        self.player.Load(curr_path+"\\music\\zik.mp3")
+        zik_path= getcwd()+"\\music\\zik.mp3"
+        print(zik_path)
+        self.player.Load(zik_path)
         self.Bind(wx.media.EVT_MEDIA_LOADED,self.button_play,self.player)
         
         #Boutons
@@ -445,7 +446,7 @@ class Loader(wx.Frame):
         
 class MyApp(wx.App):
     def OnInit(self):
-        frame = MyFrame(None, -1, "PIP_GUI_V1.1.3")
+        frame = MyFrame(None, -1, "PIP_GUI_V1.1.4")
         frame.Show(True)
         frame.Centre()
         return True
@@ -456,4 +457,4 @@ if __name__=='__main__':
     app.MainLoop()
 
 
-### PIP_GUI_V1.1.3 by François GARBEZ 10/11/2023 Tested on python 3.12 Win10 ###
+### PIP_GUI_V1.1.4 by François GARBEZ 10/11/2023 Tested on python 3.12 Win10 ###
