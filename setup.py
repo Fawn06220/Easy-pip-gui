@@ -1,6 +1,13 @@
 from distutils.core import setup
+from pathlib import Path
+
+this_directory = Path(__file__).parent
+long_description = (this_directory / "README.md").read_text()
+
 setup(
   name = 'easy-pip-gui',         # How you named your package folder (MyLib)
+  long_description=long_description,
+  long_description_content_type='text/markdown',
   packages = ['easy-pip-gui'],   # Chose the same as "name"
   version = '1.0',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
