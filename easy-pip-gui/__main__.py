@@ -444,7 +444,7 @@ class Loader(wx.Frame):
         
 class MyApp(wx.App):
     def OnInit(self):
-        frame = MyFrame(None, -1, "PIP_GUI_V1.1.5")
+        frame = MyFrame(None, -1, "PIP_GUI_V1.1.6")
         frame.Show(True)
         frame.Centre()
         return True
@@ -455,4 +455,4 @@ if __name__=='__main__':
     app.MainLoop()
 
 
-### PIP_GUI_V1.1.4 by François GARBEZ 10/11/2023 Tested on python 3.12 Win10 ###
+### PIP_GUI_V1.1.6 by François GARBEZ 10/11/2023 Tested on python 3.12 Win10 ###
