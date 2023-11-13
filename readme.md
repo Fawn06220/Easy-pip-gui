@@ -8,6 +8,8 @@ I made an easy GUI to use PIP, there are some cool functionnalities :
 - Possibility to uninstall last installed(e.g if mistake) or from a list of installed libs
 - You can listen to music o/ 
 
+USAGE : python -m easy-pip-gui
+
 -13/11/2023-
 I had to list librairies as URLs to be able to get mouse events over them...
 

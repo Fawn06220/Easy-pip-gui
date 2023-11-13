@@ -2,7 +2,7 @@
 import wx
 import time
 from time import gmtime, strftime
-import os
+import os, sys
 from os.path import *
 from os import getcwd
 import subprocess
@@ -451,7 +451,7 @@ class MyApp(wx.App):
  
 if __name__=='__main__':    
  
-    app = MyApp(0)
+    app = MyApp()
     app.MainLoop()
 
 
