@@ -1,3 +1,0 @@
-wxpython
-pip-review
-pip-api
