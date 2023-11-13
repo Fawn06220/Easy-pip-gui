@@ -2,6 +2,8 @@ Hi all !
 
 I made an easy GUI to use PIP, there are some cool functionnalities :
 
+FIRST READ HELP BY CLICKING "NEED HELP?" BUTTON =)
+
 - Type a library name in the field to install it
 - Possibility to list librairies
 - Possibility to update all your libraries/or one at once
