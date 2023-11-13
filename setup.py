@@ -1,7 +1,7 @@
 from distutils.core import setup
 setup(
-  name = 'easy-gui',         # How you named your package folder (MyLib)
-  packages = ['easy-gui'],   # Chose the same as "name"
+  name = 'easy-pip-gui',         # How you named your package folder (MyLib)
+  packages = ['easy-pip-gui'],   # Chose the same as "name"
   version = '1.0',      # Start with a small number and increase it with every change you make
   license='MIT',        # Chose a license from here: https://help.github.com/articles/licensing-a-repository
   description = 'An easy pip GUI',   # Give a short description about your library
