@@ -404,7 +404,7 @@ class MyFrame(wx.Frame):
     def Chrono(self):#Chronometre (date )
         stemps = time.strftime("%A %d/%m/%Y") #Definit le format voulu
         self.SetStatusText(stemps,1) #Affiche a droite.
-        self.SetStatusText("Developped by François Garbez",0)
+        self.SetStatusText("Developed by François Garbez",0)
     
     def CreerBarreEtat(self):#Creation de la barre d'etat du bas avec l'affichage de la date
         self.CreateStatusBar(2) #Cree une barre de statut (en bas) de deux parties.
