@@ -96,7 +96,7 @@ class MyFrame(wx.Frame):
 
         self.txtMajPip = wx.StaticText(self.panel,-1,"Link to Dev's Paypal.me :")
 
-        self.LienPip = hl.HyperLinkCtrl(self.panel, wx.ID_ANY, 'Thanks if you donate <3',URL="paypal.me/noobpythondev")
+        self.LienPip = hl.HyperLinkCtrl(self.panel, wx.ID_ANY, 'Thanks if you donate <3',URL="http://paypal.me/noobpythondev")
         self.LienPip.SetLinkCursor(wx.CURSOR_HAND)
         self.LienPip.SetUnderlines(False, False, True)
         self.LienPip.EnableRollover(True)
